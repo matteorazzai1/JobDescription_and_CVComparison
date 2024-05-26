@@ -6,6 +6,7 @@ import os
 from groq import Groq
 
 from AppLogic.sectionsSummary import summarizeSection
+from Utils.dbManager import retrieveKMostSimilar
 
 
 def extract_text_from_pdf(pdf_path):
@@ -44,7 +45,7 @@ def performRequest(prompt):
     return chat_completion.choices[0].message.content
 
 
-def main(file_path, file_type='pdf'):
+def main(file_path, file_type, job_code, job_name):
     if file_type == 'pdf':
         file_content = extract_text_from_pdf(file_path)
     elif file_type == 'docx':
@@ -53,21 +54,26 @@ def main(file_path, file_type='pdf'):
         raise ValueError("Unsupported file type. Use 'pdf' or 'docx'.")
 
     CV_description = performRequest(f"Can you try to take this content related to the text extracted from a curriculum vitae and describe it trying to concentrate on the working skills in a detailed manner and avoiding section that not regards working skills? please avoid pointed list and try to summarize{file_content}")
-    print(CV_description)
+    #print(CV_description)
 
     # derive embeddings and compute cosine similarity
     model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
-    work_activities = summarizeSection("work activities", "29-1129.01", "Art Therapist", True)
-    skills = summarizeSection("skills", "29-1129.01", "Art Therapist", True)
-    tasks = summarizeSection("tasks", "29-1129.01", "Art Therapist", True)
+    work_activities = summarizeSection("work activities", job_code, job_name, True)
+    skills = summarizeSection("skills", job_code, job_name, True)
+    tasks = summarizeSection("tasks", job_code, job_name, True)
 
-    prompt = ""
-    prompt = "Can you take the following work activities with a value of importance, the name of the activities " \
-                "and a brief description " + work_activities + " the skills with the same component: " + skills + " and the tasks" + tasks + " and make me a detailed" \
-                " description" \
-                                                                                                             ""
+    prompt = (
+            "Can you summarize a description for the job described with the following fields: "
+            + work_activities + ", " + skills + ", and " + tasks + "? "
+            "This is about an open position for a " + job_name + ". "
+            "These are some job description examples:\n" + retrieveKMostSimilar(job_name) +
+            "Be concise and precise. This should be read by a worker looking for a job, "
+            "so you have to be clear. Avoid answering with a bullet point list, and be discoursive. "
+            "Use no more than 20 lines."
+    )
 
+    job_description = performRequest(prompt)
 
     print("starting description of job")
     print(job_description)
@@ -95,6 +101,12 @@ def main(file_path, file_type='pdf'):
 
 if __name__ == '__main__':
 
-    file_path = '../misc_files/CV_-_Matteo_Razzai.pdf'  # or 'cv.docx'
+    file_path = '../misc_files/cv_main_english(5).pdf'  # or 'cv.docx'
 
-    main(file_path)
+    job_code = "29-1129.01"
+
+    job_name = "Art Therapist"
+
+    main(file_path,"pdf",job_code,job_name)
+
+    #print(extract_text_from_pdf(file_path))

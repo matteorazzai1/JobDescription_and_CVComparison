@@ -25,3 +25,5 @@ def scrape_csv(base_url, filename, toReturn):
             print(f"Failed to retrieve the file. Status code: {response.status_code}")
     except requests.RequestException as e:
         print(f"An error occurred: {e}")
+
+
