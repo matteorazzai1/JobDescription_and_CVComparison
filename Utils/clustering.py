@@ -8,6 +8,7 @@ from sentence_transformers import SentenceTransformer
 import pandas as pd
 from sklearn import cluster
 from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
 
 
 def embeddingsClustering():
@@ -25,12 +26,15 @@ def embeddingsClustering():
         length = np.sqrt((embeddings ** 2).sum(axis=1))[:, None]
         embeddings = embeddings / length
 
+        pca = PCA(n_components = 50)
+        reduced_embeddings = pca.fit_transform(embeddings)
 
-        clustering = KMeans(n_clusters=10).fit(embeddings)
+        clustering = KMeans(n_clusters=10).fit(reduced_embeddings)
         data['Label'] = clustering.labels_
         print(data)
+        print(clustering.inertia_)
         data = data.sort_values(by='Label', ascending=True)
-        data.to_csv("../misc_files/clustering_with_code.csv", index=False)
+        data.to_csv("../misc_files/clustering_prova.csv", index=False)
 
 
 
