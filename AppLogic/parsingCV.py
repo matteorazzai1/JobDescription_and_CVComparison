@@ -7,6 +7,7 @@ from groq import Groq
 
 from AppLogic.sectionsSummary import summarizeSection
 from Utils.dbManager import retrieveKMostSimilar
+from Utils.scraper import performRequest
 
 
 def extract_text_from_pdf(pdf_path):
@@ -27,22 +28,7 @@ def extract_text_from_docx(docx_path):
     return text
 
 
-def performRequest(prompt):
-    client = Groq(
-        api_key='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'
-    )
 
-    chat_completion = client.chat.completions.create(
-        messages=[
-            {
-                "role": "user",
-                "content":
-                    f"{prompt}",
-            }
-        ],
-        model="llama3-70b-8192",
-    )
-    return chat_completion.choices[0].message.content
 
 
 def jobDescriptionGeneration(job_code, job_name):
