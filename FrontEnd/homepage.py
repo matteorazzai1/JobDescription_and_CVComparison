@@ -1,9 +1,10 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, filedialog
 import pandas as pd
 
 
-from AppLogic.parsingCV import compareCVJobDescription, jobDescriptionGeneration, performRequest
+from AppLogic.parsingCV import compareCVJobDescription, jobDescriptionGeneration, performRequest, extract_text_from_pdf
+
 from AppLogic.sectionsSummary import summarizeSection, buildPromptSummarization
 
 class JobDescriptionApp:
@@ -16,6 +17,8 @@ class JobDescriptionApp:
         self.setup_styles()
 
         self.create_home_page()
+
+        self.current_jobDescription = ""
 
     def create_scrollable_frame(self):
         container = ttk.Frame(self.root)
@@ -129,6 +132,8 @@ class JobDescriptionApp:
         skills = performRequest(buildPromptSummarization(skillsRetrieved, "skills", j["Occupation"],  False, True))
         tasks = performRequest(buildPromptSummarization(taskRetrieved, "tasks", j["Occupation"], False, True))
 
+        self.current_jobDescription = overall_description
+
         notebook = ttk.Notebook(self.scrollable_frame)
         notebook.grid(row=0, column=0, padx=10, pady=10, sticky=(tk.W, tk.E, tk.N, tk.S))
 
@@ -158,6 +163,9 @@ class JobDescriptionApp:
         back_button = ttk.Button(self.scrollable_frame, text="Back", command=lambda cat=j["Category"]: self.open_jobs_list(cat))
         back_button.grid(row=1, column=0, pady=20, sticky=(tk.W, tk.E))
 
+        upload_button = ttk.Button(self.scrollable_frame, text="Upload CV", command=self.upload_file)
+        upload_button.grid(row=3, column=0, pady=10, sticky=(tk.W, tk.E))
+
         self.scrollable_frame.grid_rowconfigure(1, weight=1)
         self.scrollable_frame.grid_columnconfigure(0, weight=1)
 
@@ -174,6 +182,25 @@ class JobDescriptionApp:
         skills_frame.grid_columnconfigure(0, weight=1)
         tasks_frame.grid_rowconfigure(0, weight=1)
         tasks_frame.grid_columnconfigure(0, weight=1)
+
+    def upload_file(self):
+        file_path = filedialog.askopenfilename()
+        if file_path:
+            self.handle_file(file_path)
+
+    def handle_file(self, file_path):
+        similarity = compareCVJobDescription(file_path, "pdf", self.current_jobDescription)
+        self.show_popup(f"The similarity between your CV and the job offer is:" + "{:.2f}".format(similarity))
+
+    def show_popup(self, text):
+        popup = tk.Toplevel(self.root)
+        popup.title("File Content")
+
+        label = ttk.Label(popup, text=text, wraplength=300)
+        label.pack(padx=20, pady=20)
+
+        ok_button = ttk.Button(popup, text="OK", command=popup.destroy)
+        ok_button.pack(pady=10)
 
 
 
