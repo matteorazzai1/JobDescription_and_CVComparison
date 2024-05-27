@@ -3,9 +3,11 @@ from tkinter import ttk, filedialog
 import pandas as pd
 
 
-from AppLogic.parsingCV import compareCVJobDescription, jobDescriptionGeneration, performRequest, extract_text_from_pdf
+from AppLogic.parsingCV import compareCVJobDescription, jobDescriptionGeneration, extract_text_from_pdf
 
 from AppLogic.sectionsSummary import summarizeSection, buildPromptSummarization
+from Utils.scraper import performRequest
+
 
 class JobDescriptionApp:
     def __init__(self, root):
@@ -105,7 +107,7 @@ class JobDescriptionApp:
         max_width = self.root.winfo_width() - 40  # Adjust width as needed
         wraplength = max_width
 
-        label = ttk.Label(self.scrollable_frame, text=f"Matching CVs for {job_category}", font=("Helvetica", 18, 'bold'), wraplength=wraplength)
+        label = ttk.Label(self.scrollable_frame, text=f"Matching CVs for {job_category}", font=("Helvetica", 18, 'bold'), wraplength=wraplength, width=116)
         label.grid(pady=10, sticky=(tk.W, tk.E))
 
         for i, job in jobs.iterrows():
