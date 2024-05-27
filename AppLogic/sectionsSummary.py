@@ -4,18 +4,21 @@ import pandas as pd
 
 from Utils.scraper import scrape_csv
 
-def buildPromptSummarization(dataframe, section, actualJob, returnSection):
-    dataframe = pd.DataFrame(dataframe).reset_index(drop=True).astype(str)
-    prompt = ""
-    iterator = dataframe.iterrows()
-    for i in range (0, len(dataframe)):
-        val = next(iterator)[1]
-        if (section == "skills"):
-            prompt = prompt + val['Importance'] + " - " + val['Skill'] + " - " + val['Skill Description'] + "\n"
-        elif (section == "tasks"):
-            prompt = prompt + val["Importance"] + " - " + val["Task"] + "\n"
-        elif (section == "work activities"):
-            prompt = prompt + val["Importance"] + " - " + val["Work Activity"] + " - " + val["Work Activity Description"] + "\n"
+def buildPromptSummarization(dataframe, section, actualJob, returnSection, isString):
+    if isString == False:
+        dataframe = pd.DataFrame(dataframe).reset_index(drop=True).astype(str)
+        prompt = ""
+        iterator = dataframe.iterrows()
+        for i in range (0, len(dataframe)):
+            val = next(iterator)[1]
+            if (section == "skills"):
+                prompt = prompt + val['Importance'] + " - " + val['Skill'] + " - " + val['Skill Description'] + "\n"
+            elif (section == "tasks"):
+                prompt = prompt + val["Importance"] + " - " + val["Task"] + "\n"
+            elif (section == "work activities"):
+                prompt = prompt + val["Importance"] + " - " + val["Work Activity"] + " - " + val["Work Activity Description"] + "\n"
+    else:
+        prompt = dataframe
 
     if (returnSection):
         return prompt
@@ -33,13 +36,12 @@ def buildPromptSummarization(dataframe, section, actualJob, returnSection):
     prompt = prompt + "Be concise and precise. This should be read by a worker looking for a job, so you have to be clear.\n" \
                       "Avoid answering with a bullet point list, and be discoursive. Use no more than 15 lines."
 
-    #print(prompt)
     return prompt
 
 
 
 
-def summarizeSection(section, jobCode, jobName, returnSection):
+def summarizeSection(section, jobCode, jobName, returnSection, isString):
     url = "https://www.onetonline.org/link/table/details/"
     if (section == "skills"):
         url = url + "sk/" + jobCode + "/Skills"
@@ -51,12 +53,7 @@ def summarizeSection(section, jobCode, jobName, returnSection):
     jobCode = jobCode.replace(".", "-")
     url = url + "_" + jobCode + ".csv?fmt=csv&s=IM&t=-10"
     data = pd.read_csv(BytesIO(scrape_csv(url, jobCode, toReturn=True))).head(10)
-    return buildPromptSummarization(data, section, jobName, returnSection)
+    return buildPromptSummarization(data, section, jobName, returnSection, isString)
 
 
 
-def main():
-    summarizeSection("work activities", "29-1129.01", "Art Therapist", False)
-
-if __name__ == '__main__':
-    main()
