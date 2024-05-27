@@ -2,14 +2,16 @@ import tkinter as tk
 from tkinter import ttk, filedialog
 import pandas as pd
 
-from AppLogic.parsingCV import compareCVJobDescription, jobDescriptionGeneration, performRequest, extract_text_from_pdf
-from AppLogic.sectionsSummary import summarizeSection, buildPromptSummarization
 
+from AppLogic.parsingCV import compareCVJobDescription, jobDescriptionGeneration, performRequest, extract_text_from_pdf
+
+from AppLogic.sectionsSummary import summarizeSection, buildPromptSummarization
 
 class JobDescriptionApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Job Description and CV Matching")
+
 
         self.style = ttk.Style()
         self.setup_styles()
@@ -63,6 +65,7 @@ class JobDescriptionApp:
                           "Communication, Entertainment, and Creative Professions", "Engineering and Technology",
                           "Management and Supervision", "Education and Teaching"]
 
+
         job_cat = [f"{job_categories[i]}" for i in range(10)]
 
         frame = ttk.Frame(self.root, padding="20")
@@ -86,13 +89,16 @@ class JobDescriptionApp:
         self.clear_frame()
         self.create_scrollable_frame()
 
+
         csvreader = pd.read_csv("../misc_files/jobList.csv")
         data = csvreader[["Code", "Occupation", "Category"]]
+
 
         data = pd.DataFrame(data)
         data["Code"] = data["Code"].astype(str)
         data["Occupation"] = data["Occupation"].astype(str)
         data["Category"] = data["Category"].astype(str)
+
 
         jobs = data[data["Category"] == job_category]
 
@@ -195,6 +201,7 @@ class JobDescriptionApp:
 
         ok_button = ttk.Button(popup, text="OK", command=popup.destroy)
         ok_button.pack(pady=10)
+
 
 
 if __name__ == "__main__":
