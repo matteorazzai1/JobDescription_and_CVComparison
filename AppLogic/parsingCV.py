@@ -66,7 +66,7 @@ def jobDescriptionGeneration(job_code, job_name):
     return job_description, work_activities, skills, tasks
 
 
-def compareCVJobDescription(file_path, file_type, job_code, job_name, job_description):
+def compareCVJobDescription(file_path, file_type, job_description):
     if file_type == 'pdf':
         file_content = extract_text_from_pdf(file_path)
     elif file_type == 'docx':
@@ -74,7 +74,10 @@ def compareCVJobDescription(file_path, file_type, job_code, job_name, job_descri
     else:
         raise ValueError("Unsupported file type. Use 'pdf' or 'docx'.")
 
-    CV_description = performRequest(f"Can you try to take this content related to the text extracted from a curriculum vitae and describe it trying to concentrate on the working skills in a detailed manner and avoiding section that not regards working skills? please avoid pointed list and try to summarize{file_content}")
+    CV_description = performRequest(f"Can you take this content related to the text extracted from a curriculum "
+                                    f"vitae and resume it trying to focus on the working skills, working experiences and background in a detailed "
+                                    f"manner and avoiding section that do not regard those sections? please avoid answering with a bullet point list, be precise, concise"
+                                    f"and discoursive. The text to resume is the following: {file_content}")
     #print(CV_description)
 
     # derive embeddings and compute cosine similarity
@@ -84,12 +87,15 @@ def compareCVJobDescription(file_path, file_type, job_code, job_name, job_descri
     print(job_description)
     print("ending description of job")
 
+    print(CV_description)
+
     job_embedding = model.encode([job_description])
     cv_embedding = model.encode([CV_description])
 
     similarity = cosine_similarity(job_embedding, cv_embedding)
 
     print("Cosine Similarity:", similarity[0][0])
+    return similarity[0][0]
 
 
 if __name__ == '__main__':
@@ -100,6 +106,6 @@ if __name__ == '__main__':
 
     job_name = "Art Therapist"
 
-    compareCVJobDescription(file_path, "pdf", job_code, job_name)
+    compareCVJobDescription(file_path, "pdf")
 
     #print(extract_text_from_pdf(file_path))
