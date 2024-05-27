@@ -45,7 +45,28 @@ def performRequest(prompt):
     return chat_completion.choices[0].message.content
 
 
-def main(file_path, file_type, job_code, job_name):
+def jobDescriptionGeneration(job_code, job_name):
+    model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+    work_activities = summarizeSection("work activities", job_code, job_name, True, False)
+    skills = summarizeSection("skills", job_code, job_name, True, False)
+    tasks = summarizeSection("tasks", job_code, job_name, True, False)
+
+    prompt = (
+            "Can you summarize a description for the job described with the following lists of work activities,"
+            "skills and tasks? Each number before them is the importance of the activity, task or skill for the job\nWork activities:\n "
+            + work_activities + "\nSkills:\n" + skills + "\nTasks:\n" + tasks +
+            "This is about an open position for a " + job_name + ". "
+            "These are some job description examples:\n" + retrieveKMostSimilar(model.encode(job_name)) +
+            "Be concise and precise. This should be read by a worker looking for a job, "
+            "so you have to be clear. Avoid answering with a bullet point list, and be discoursive. "
+            "Use no more than 20 lines."
+    )
+    print(prompt)
+    job_description = performRequest(prompt)
+    return job_description, work_activities, skills, tasks
+
+
+def compareCVJobDescription(file_path, file_type, job_code, job_name, job_description):
     if file_type == 'pdf':
         file_content = extract_text_from_pdf(file_path)
     elif file_type == 'docx':
@@ -59,40 +80,12 @@ def main(file_path, file_type, job_code, job_name):
     # derive embeddings and compute cosine similarity
     model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
-    work_activities = summarizeSection("work activities", job_code, job_name, True)
-    skills = summarizeSection("skills", job_code, job_name, True)
-    tasks = summarizeSection("tasks", job_code, job_name, True)
-
-    prompt = (
-            "Can you summarize a description for the job described with the following fields: "
-            + work_activities + ", " + skills + ", and " + tasks + "? "
-            "This is about an open position for a " + job_name + ". "
-            "These are some job description examples:\n" + retrieveKMostSimilar(job_name) +
-            "Be concise and precise. This should be read by a worker looking for a job, "
-            "so you have to be clear. Avoid answering with a bullet point list, and be discoursive. "
-            "Use no more than 20 lines."
-    )
-
-    job_description = performRequest(prompt)
-
     print("starting description of job")
     print(job_description)
     print("ending description of job")
 
-    '''
-    job_description = """
-    We are looking for a student with experience in Python, C/C++, and Java. 
-    The candidate should have a good knowledge on programming language and working with databases. 
-    Experience with English and a guide license is a plus.
-    """
-    '''
-
-
     job_embedding = model.encode([job_description])
     cv_embedding = model.encode([CV_description])
-
-    # print(job_embedding)
-    # print(cv_embedding)
 
     similarity = cosine_similarity(job_embedding, cv_embedding)
 
@@ -107,6 +100,6 @@ if __name__ == '__main__':
 
     job_name = "Art Therapist"
 
-    main(file_path,"pdf",job_code,job_name)
+    compareCVJobDescription(file_path, "pdf", job_code, job_name)
 
     #print(extract_text_from_pdf(file_path))
