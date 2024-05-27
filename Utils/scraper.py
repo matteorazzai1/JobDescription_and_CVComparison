@@ -1,6 +1,9 @@
 import requests
 import os
 
+from groq import Groq
+
+
 def scrape_csv(base_url, filename, toReturn):
     directory = "misc_files"
     filepath = os.path.join(directory, filename)
@@ -26,4 +29,21 @@ def scrape_csv(base_url, filename, toReturn):
     except requests.RequestException as e:
         print(f"An error occurred: {e}")
 
+
+def performRequest(prompt):
+    client = Groq(
+        api_key='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'
+    )
+
+    chat_completion = client.chat.completions.create(
+        messages=[
+            {
+                "role": "user",
+                "content":
+                    f"{prompt}",
+            }
+        ],
+        model="llama3-70b-8192",
+    )
+    return chat_completion.choices[0].message.content
 
