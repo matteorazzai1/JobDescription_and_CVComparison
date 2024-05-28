@@ -33,7 +33,7 @@ def buildPromptSummarization(dataframe, section, actualJob, returnSection, isStr
     elif (section == "workactivities"):
         prompt = prompt + "work activity for this position. The textual description is divided into work activity name and work activity description. Those sections are divided by \"-\" symbol.\n"
 
-    prompt = prompt + "Be concise and precise. This should be read by a worker looking for a job, so you have to be clear.\n" \
+    prompt = prompt + "Be clear and precise. This should be read by a worker looking for a job, so you have to be clear.\n" \
                       "Avoid answering with a bullet point list, and be discoursive. Use no more than 15 lines."
 
     return prompt
