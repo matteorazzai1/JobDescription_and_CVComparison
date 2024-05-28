@@ -192,17 +192,34 @@ class JobDescriptionApp:
 
     def handle_file(self, file_path):
         similarity = compareCVJobDescription(file_path, "pdf", self.current_jobDescription)
-        self.show_popup(f"The similarity between your CV and the job offer is:" + "{:.2f}".format(similarity))
+        output = f"The similarity between your CV and the job offer is: " + "{:.2f}".format(similarity)
+        if similarity >= 0.3:
+            output += "\nWe suggest you to apply for this job, you're' a good candidate, in line with the job offer"
+        elif 0.25 <= similarity < 0.3:
+            output += "\nYou could apply for this job, you probably are a good candidate"
+        elif 0.2 <= similarity < 0.25:
+            output += "\nYou could apply for this job but you're not quite in line with the offer requests"
+        elif similarity < 0.2:
+            output += "\nWe suggest you to not apply for this job, this is quite different from your background, experience and skills"
+        self.show_popup(output)
 
     def show_popup(self, text):
         popup = tk.Toplevel(self.root)
         popup.title("File Content")
 
-        label = ttk.Label(popup, text=text, wraplength=300)
-        label.pack(padx=20, pady=20)
+        # Set the size of the popup window explicitly
+        popup.geometry("400x300")
 
-        ok_button = ttk.Button(popup, text="OK", command=popup.destroy)
+        # Create a frame to hold the label and button
+        frame = ttk.Frame(popup)
+        frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        label = ttk.Label(frame, text=text, wraplength=350)
+        label.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        ok_button = ttk.Button(frame, text="OK", command=popup.destroy)
         ok_button.pack(pady=10)
+
 
 
 
