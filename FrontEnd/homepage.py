@@ -112,18 +112,47 @@ class JobDescriptionApp:
         max_width = self.root.winfo_width() - 40  # Adjust width as needed
         wraplength = max_width
 
-        label = ttk.Label(self.scrollable_frame, text=f"Matching CVs for {job_category}", font=("Helvetica", 18, 'bold'), wraplength=wraplength,width=116)
-        label.grid(pady=10, sticky=(tk.W, tk.E))
+        label = ttk.Label(self.scrollable_frame, text=f"Matching jobs for {job_category}", font=("Helvetica", 18, 'bold'), wraplength=wraplength,width=116,anchor="center")
+        label.grid(pady=10, columnspan=2, sticky=(tk.N), row=0)
 
-        for i, job in jobs.iterrows():
+        back_button = ttk.Button(self.scrollable_frame, text="Back", width=25, command=self.create_home_page)
+        back_button.grid(pady=10, sticky=(tk.W, tk.N), row=0)
+
+        search_var = tk.StringVar()
+        search_entry = ttk.Entry(self.scrollable_frame, textvariable=search_var, width=30)
+        search_entry.grid(row=1, pady=10, sticky=(tk.N))
+
+        search_button = ttk.Button(self.scrollable_frame, text="Search", command=lambda: self.update_job_buttons(search_var.get(), jobs))
+        search_button.grid(row=2, pady=5, sticky=(tk.N))
+
+        #search_var.trace("w", lambda name, index, mode: self.update_job_buttons(search_var.get()))
+
+        self.job_buttons_frame = ttk.Frame(self.scrollable_frame)
+        self.job_buttons_frame.grid(row=3, column=0, columnspan=4, sticky=(tk.W, tk.E))
+        self.job_buttons_frame.grid_columnconfigure(0, weight=1)
+
+        self.display_jobs(jobs)
+
+        '''for i, job in jobs.iterrows():
             button = ttk.Button(self.scrollable_frame, text=job['Occupation'], command=lambda j=job: self.open_job_page(j))
-            button.grid(row=i+1, column=0, pady=5, sticky=(tk.W, tk.E))
+            button.grid(row=i+1, column=0, pady=5, sticky=(tk.W, tk.E))'''
 
-        back_button = ttk.Button(self.scrollable_frame, text="Back", command=self.create_home_page)
-        back_button.grid(pady=20, sticky=(tk.W, tk.E))
 
         self.scrollable_frame.grid_rowconfigure(len(jobs) + 1, weight=1)
         self.scrollable_frame.grid_columnconfigure(0, weight=1)
+
+    def display_jobs(self, jobs):
+        for widget in self.job_buttons_frame.winfo_children():
+            widget.destroy()
+
+        for i, job in jobs.iterrows():
+            button = ttk.Button(self.job_buttons_frame, text=job['Occupation'],
+                                command=lambda j=job: self.open_job_page(j))
+            button.grid(row=i, column=0, pady=5, sticky=(tk.W, tk.E))
+
+    def update_job_buttons(self, search_query, jobs):
+        filtered_jobs = jobs[jobs['Occupation'].str.contains(search_query, case=False, na=False)]
+        self.display_jobs(filtered_jobs)
 
     def clear_frame(self):
         for widget in self.root.winfo_children():
