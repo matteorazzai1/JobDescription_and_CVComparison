@@ -125,17 +125,12 @@ class JobDescriptionApp:
         search_button = ttk.Button(self.scrollable_frame, text="Search", command=lambda: self.update_job_buttons(search_var.get(), jobs))
         search_button.grid(row=2, pady=5, sticky=(tk.N))
 
-        #search_var.trace("w", lambda name, index, mode: self.update_job_buttons(search_var.get()))
 
         self.job_buttons_frame = ttk.Frame(self.scrollable_frame)
         self.job_buttons_frame.grid(row=3, column=0, columnspan=4, sticky=(tk.W, tk.E))
         self.job_buttons_frame.grid_columnconfigure(0, weight=1)
 
         self.display_jobs(jobs)
-
-        '''for i, job in jobs.iterrows():
-            button = ttk.Button(self.scrollable_frame, text=job['Occupation'], command=lambda j=job: self.open_job_page(j))
-            button.grid(row=i+1, column=0, pady=5, sticky=(tk.W, tk.E))'''
 
 
         self.scrollable_frame.grid_rowconfigure(len(jobs) + 1, weight=1)
