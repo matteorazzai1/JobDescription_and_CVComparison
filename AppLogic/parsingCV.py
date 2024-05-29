@@ -43,7 +43,7 @@ def jobDescriptionGeneration(job_code, job_name):
             + work_activities + "\nSkills:\n" + skills + "\nTasks:\n" + tasks +
             "This is about an open position for a " + job_name + ". "
             "These are some job description examples:\n" + retrieveKMostSimilar(model.encode(job_name)) +
-            "Be concise and precise. This should be read by a worker looking for a job, "
+            "Be clear and precise. This should be read by a worker looking for a job, "
             "so you have to be clear. Avoid answering with a bullet point list, and be discoursive. "
             "Use no more than 20 lines."
     )
@@ -62,8 +62,8 @@ def compareCVJobDescription(file_path, file_type, job_description):
 
     CV_description = performRequest(f"Can you take this content related to the text extracted from a curriculum "
                                     f"vitae and resume it trying to focus on the working skills, working experiences and background in a detailed "
-                                    f"manner and avoiding section that do not regard those sections? please avoid answering with a bullet point list, be precise, concise"
-                                    f"and discoursive. The text to resume is the following: {file_content}")
+                                    f"manner and avoiding section that do not regard those sections? please avoid answering with a bullet point list, be precise, clear "
+                                    f"and discoursive. Put only the Curriculum resume in the answer. The text to resume is the following: {file_content}")
     #print(CV_description)
 
     # derive embeddings and compute cosine similarity
@@ -84,14 +84,3 @@ def compareCVJobDescription(file_path, file_type, job_description):
     return similarity[0][0]
 
 
-if __name__ == '__main__':
-
-    file_path = '../misc_files/cv_main_english(5).pdf'  # or 'cv.docx'
-
-    job_code = "29-1129.01"
-
-    job_name = "Art Therapist"
-
-    compareCVJobDescription(file_path, "pdf")
-
-    #print(extract_text_from_pdf(file_path))

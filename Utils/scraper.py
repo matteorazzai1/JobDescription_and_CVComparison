@@ -46,3 +46,20 @@ def performRequest(prompt):
     )
     return chat_completion.choices[0].message.content
 
+def performRequest(prompt):
+    client = Groq(
+        api_key='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'
+    )
+
+    chat_completion = client.chat.completions.create(
+        messages=[
+            {
+                "role": "user",
+                "content":
+                    f"{prompt}",
+            }
+        ],
+        model="llama3-70b-8192",
+    )
+    return chat_completion.choices[0].message.content
+
