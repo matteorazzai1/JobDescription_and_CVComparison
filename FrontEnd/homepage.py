@@ -1,3 +1,4 @@
+import threading
 import tkinter as tk
 from tkinter import ttk, filedialog
 import pandas as pd
@@ -125,9 +126,13 @@ class JobDescriptionApp:
         search_button = ttk.Button(self.scrollable_frame, text="Search", command=lambda: self.update_job_buttons(search_var.get(), jobs))
         search_button.grid(row=2, pady=5, sticky=(tk.N))
 
+        # Create a progress bar
+        self.progress_bar = ttk.Progressbar(self.scrollable_frame, orient="horizontal", length=600, mode="determinate")
+        self.progress_bar.grid(row=3, pady=20, sticky=(tk.N))
+
 
         self.job_buttons_frame = ttk.Frame(self.scrollable_frame)
-        self.job_buttons_frame.grid(row=3, column=0, columnspan=4, sticky=(tk.W, tk.E))
+        self.job_buttons_frame.grid(row=4, column=0, columnspan=4, sticky=(tk.W, tk.E))
         self.job_buttons_frame.grid_columnconfigure(0, weight=1)
 
         self.display_jobs(jobs)
@@ -142,8 +147,21 @@ class JobDescriptionApp:
 
         for i, job in jobs.iterrows():
             button = ttk.Button(self.job_buttons_frame, text=job['Occupation'],
-                                command=lambda j=job: self.open_job_page(j))
+                                command=lambda j=job: self.start_open_job_page(j))
             button.grid(row=i, column=0, pady=5, sticky=(tk.W, tk.E))
+
+
+
+    def start_open_job_page(self, job):
+        # Run the long-running task in a separate thread to avoid blocking the GUI
+        threading.Thread(target=self.open_job_page, args=(job,)).start()
+
+    def start_open_CV(self,path):
+        threading.Thread(target=self.handle_file, args=(path,)).start()
+
+    def update_progress_bar(self, value):
+        self.progress_bar['value'] = value
+        self.root.update_idletasks()
 
     def update_job_buttons(self, search_query, jobs):
         filtered_jobs = jobs[jobs['Occupation'].str.contains(search_query, case=False, na=False)]
@@ -154,14 +172,22 @@ class JobDescriptionApp:
             widget.destroy()
 
     def open_job_page(self, j):
-        self.clear_frame()
-        self.create_scrollable_frame()
+        self.update_progress_bar(10)
+
 
         # Summarize the sections
         overall_description, workAct, skillsRetrieved, taskRetrieved = jobDescriptionGeneration(j["Code"], j["Occupation"])
+        self.update_progress_bar(25)
         work_activities = performRequest(buildPromptSummarization(workAct, "work activities", j["Occupation"], False, True))
+        self.update_progress_bar(50)
         skills = performRequest(buildPromptSummarization(skillsRetrieved, "skills", j["Occupation"],  False, True))
+        self.update_progress_bar(75)
         tasks = performRequest(buildPromptSummarization(taskRetrieved, "tasks", j["Occupation"], False, True))
+        self.update_progress_bar(100)
+
+
+        self.clear_frame()
+        self.create_scrollable_frame()
 
         self.current_jobDescription = overall_description
 
@@ -192,7 +218,11 @@ class JobDescriptionApp:
 
         # Add a back button
         back_button = ttk.Button(self.scrollable_frame, text="Back", command=lambda cat=j["Category"]: self.open_jobs_list(cat))
-        back_button.grid(row=1, column=0, pady=20, sticky=(tk.W, tk.E))
+        back_button.grid(row=2, column=0, pady=20, sticky=(tk.W, tk.E))
+
+        # Create a progress bar
+        self.progress_bar = ttk.Progressbar(self.scrollable_frame, orient="horizontal", length=600, mode="determinate")
+        self.progress_bar.grid(row=1, pady=20, sticky=(tk.N))
 
         upload_button = ttk.Button(self.scrollable_frame, text="Upload CV", command=self.upload_file)
         upload_button.grid(row=3, column=0, pady=10, sticky=(tk.W, tk.E))
@@ -217,10 +247,13 @@ class JobDescriptionApp:
     def upload_file(self):
         file_path = filedialog.askopenfilename()
         if file_path:
-            self.handle_file(file_path)
+            self.update_progress_bar(10)
+            self.start_open_CV(file_path)
+            #self.handle_file(file_path)
 
     def handle_file(self, file_path):
         similarity = compareCVJobDescription(file_path, "pdf", self.current_jobDescription)
+        self.update_progress_bar(75)
         output = f"The similarity between your CV and the job offer is: " + "{:.2f}".format(similarity)
         if similarity >= 0.3:
             output += "\nWe suggest you to apply for this job, you're' a good candidate, in line with the job offer"
@@ -230,6 +263,7 @@ class JobDescriptionApp:
             output += "\nYou could apply for this job but you're not quite in line with the offer requests"
         elif similarity < 0.2:
             output += "\nWe suggest you to not apply for this job, this is quite different from your background, experience and skills"
+        self.update_progress_bar(100)
         self.show_popup(output)
 
     def show_popup(self, text):
