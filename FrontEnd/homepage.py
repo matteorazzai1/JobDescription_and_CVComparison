@@ -87,7 +87,6 @@ class JobDescriptionApp:
         for i in range(2):
             frame.columnconfigure(i, weight=1, uniform='column')
         for i in range((len(job_cat) + 1) // 2):
-            print(i)
             frame.rowconfigure(i+1, weight=1, uniform='row')
 
         self.root.grid_columnconfigure(0, weight=1)
