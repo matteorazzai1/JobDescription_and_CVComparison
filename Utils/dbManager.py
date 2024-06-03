@@ -38,7 +38,6 @@ def insertData():
 
     count = 0
     for index, val in iterator:
-        print(count)
         model = SentenceTransformer("all-MiniLM-L6-v2")
         embedding = model.encode(val["Job Description"])
         docs.upsert([(val["Job Title"], embedding, {"description": val["Job Description"]})])
@@ -64,11 +63,3 @@ def formatResults(results):
     return promptString
 
 
-def main():
-    model = SentenceTransformer("all-MiniLM-L6-v2")
-    embedding = model.encode("Electrical engineer")
-    insertData()
-
-
-if __name__ == '__main__':
-    main()

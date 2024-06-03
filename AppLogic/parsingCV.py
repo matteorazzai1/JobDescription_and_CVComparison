@@ -47,7 +47,7 @@ def jobDescriptionGeneration(job_code, job_name):
             "so you have to be clear. Avoid answering with a bullet point list, and be discoursive. "
             "Use no more than 20 lines."
     )
-    print(prompt)
+    #print(prompt)
     job_description = performRequest(prompt)
     return job_description, work_activities, skills, tasks
 
@@ -69,11 +69,6 @@ def compareCVJobDescription(file_path, file_type, job_description):
     # derive embeddings and compute cosine similarity
     model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
-    print("starting description of job")
-    print(job_description)
-    print("ending description of job")
-
-    print(CV_description)
 
     job_embedding = model.encode([job_description])
     cv_embedding = model.encode([CV_description])

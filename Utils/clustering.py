@@ -31,8 +31,6 @@ def embeddingsClustering():
 
         clustering = KMeans(n_clusters=10).fit(reduced_embeddings)
         data['Label'] = clustering.labels_
-        print(data)
-        print(clustering.inertia_)
         data = data.sort_values(by='Label', ascending=True)
         data.to_csv("../misc_files/clustering_prova.csv", index=False)
 
@@ -44,8 +42,4 @@ def embeddingsClustering():
     except Exception as e:
         print(f"An error occurred while reading the file: {e}")
 
-def main():
-    embeddingsClustering()
 
-if __name__ == '__main__':
-    main()
